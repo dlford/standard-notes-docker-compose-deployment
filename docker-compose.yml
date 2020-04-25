@@ -29,6 +29,11 @@ services:
       SECRET_KEY_BASE: changeme123
       DISABLE_USER_REGISTRATION: 1
     ports:
+      - '3001:3000'
+  web:
+    restart: always
+    build: ./web
+    ports:
       - '3000:3000'
 
 volumes:
