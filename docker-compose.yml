@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  db:
+    restart: always
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: standardnotes_db
+      MYSQL_USER: standardnotes_user
+      MYSQL_PASSWORD: changeme123
+      MYSQL_ROOT_PASSWORD: changeme123
+    volumes:
+      - standardnotes_db:/var/lib/mysql
+  api:
+    restart: always
+    build: ./syncing-server
+    depends_on:
+      - db
+    command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      EXPOSED_PORT: 3000
+      RAILS_ENV: production
+      DB_DATABASE: standardnotes_db
+      DB_USERNAME: standardnotes_user
+      DB_PASSWORD: changeme123
+      DB_ROOT_PASSWORD: changeme123
+      SECRET_KEY_BASE: changeme123
+      DISABLE_USER_REGISTRATION: 1
+    ports:
+      - '3000:3000'
+
+volumes:
+  standardnotes_db:
