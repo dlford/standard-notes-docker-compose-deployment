@@ -1,0 +1,69 @@
+version: '2'
+
+services:
+  db:
+    restart: always
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: standardnotes_db
+      MYSQL_USER: standardnotes_user
+      MYSQL_PASSWORD: changeme123
+      MYSQL_ROOT_PASSWORD: changeme123
+    volumes:
+      - standardnotes_db:/var/lib/mysql
+    networks:
+      standardnotes:
+        aliases:
+          - db
+  api:
+    restart: always
+    build: ./syncing-server
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      EXPOSED_PORT: 3000
+      RAILS_ENV: production
+      DB_DATABASE: standardnotes_db
+      DB_USERNAME: standardnotes_user
+      DB_PASSWORD: changeme123
+      DB_ROOT_PASSWORD: changeme123
+      SECRET_KEY_BASE: changeme123
+      DISABLE_USER_REGISTRATION: 'false'
+    networks:
+      standardnotes:
+        aliases:
+          - api
+  web:
+    restart: always
+    build: ./web
+    environment:
+      RAILS_ENV: production
+      PORT: 3000
+      APP_HOST: 'http://localhost:3000'
+      SECRET_KEY_BASE: changeme123
+      SF_DEFAULT_SERVER: 'http://localhost:3000/api'
+      EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
+      BATCH_MANAGER_LOCATION: extensions/batch-manager/dist/index.min.html
+      RAILS_SERVE_STATIC_FILES: 'true'
+    networks:
+      standardnotes:
+        aliases:
+          - web
+  nginx:
+    depends_on:
+      - api
+      - web
+    build: ./nginx
+    ports:
+      - '3000:3000'
+    networks:
+      standardnotes:
+        aliases:
+          - nginx
+
+volumes:
+  standardnotes_db:
+networks:
+  standardnotes:

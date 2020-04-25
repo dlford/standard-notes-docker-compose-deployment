@@ -1,0 +1,6 @@
+[submodule "syncing-server"]
+	path = syncing-server
+	url = https://github.com/standardnotes/syncing-server.git
+[submodule "web"]
+	path = web
+	url = https://github.com/standardnotes/web.git
