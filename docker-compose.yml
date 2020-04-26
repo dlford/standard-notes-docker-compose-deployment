@@ -45,6 +45,7 @@ services:
       SF_DEFAULT_SERVER: 'http://localhost:3000/api'
       EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
       BATCH_MANAGER_LOCATION: extensions/batch-manager/dist/index.min.html
+      RAILS_SERVE_STATIC_FILES: 'true'
     networks:
       standardnotes:
         aliases:

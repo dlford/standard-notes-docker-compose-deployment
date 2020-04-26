@@ -1,0 +1,22 @@
+stages:
+  - build
+  - deploy
+  - cleanup
+build:
+  environment:
+    name: Build
+  only:
+    - master
+  stage: build
+  script:
+    - git submodule update --init --recursive
+    - COMPOSE_PROJECT_NAME=standardnotes docker-compose build
+deploy:
+  environment:
+    name: Deploy to Production
+  only:
+    - master
+  stage: deploy
+  script:
+    - COMPOSE_PROJECT_NAME=standardnotes docker-compose up -d
+
