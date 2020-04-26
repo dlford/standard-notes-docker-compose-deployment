@@ -11,6 +11,10 @@ services:
       MYSQL_ROOT_PASSWORD: changeme123
     volumes:
       - standardnotes_db:/var/lib/mysql
+    networks:
+      standardnotes:
+        aliases:
+          - db
   api:
     restart: always
     build: ./syncing-server
@@ -28,13 +32,36 @@ services:
       DB_ROOT_PASSWORD: changeme123
       SECRET_KEY_BASE: changeme123
       DISABLE_USER_REGISTRATION: 'true'
-    ports:
-      - '3001:3000'
+    networks:
+      standardnotes:
+        aliases:
+          - api
   web:
     restart: always
     build: ./web
+    environment:
+      RAILS_ENV: production
+      SECRET_KEY_BASE: changeMeTo128CharRandomString
+      SF_DEFAULT_SERVER: 'http://localhost:3000/api'
+      EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
+      BATCH_MANAGER_LOCATION: extensions/batch-manager/dist/index.min.html
+    networks:
+      standardnotes:
+        aliases:
+          - web
+  nginx:
+    depends_on:
+      - api
+      - web
+    build: ./nginx
     ports:
       - '3000:3000'
+    networks:
+      standardnotes:
+        aliases:
+          - nginx
 
 volumes:
   standardnotes_db:
+networks:
+  standardnotes:
