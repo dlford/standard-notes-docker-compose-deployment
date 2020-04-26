@@ -27,7 +27,7 @@ services:
       DB_PASSWORD: changeme123
       DB_ROOT_PASSWORD: changeme123
       SECRET_KEY_BASE: changeme123
-      DISABLE_USER_REGISTRATION: 1
+      DISABLE_USER_REGISTRATION: 'true'
     ports:
       - '3001:3000'
   web:
