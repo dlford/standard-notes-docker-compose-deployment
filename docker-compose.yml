@@ -20,7 +20,6 @@ services:
     build: ./syncing-server
     depends_on:
       - db
-    command: bash -c "bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
     environment:
       DB_HOST: db
       DB_PORT: 3306
@@ -31,7 +30,7 @@ services:
       DB_PASSWORD: changeme123
       DB_ROOT_PASSWORD: changeme123
       SECRET_KEY_BASE: changeme123
-      DISABLE_USER_REGISTRATION: 'false'
+      DISABLE_USER_REGISTRATION: 'true'
     networks:
       standardnotes:
         aliases:
