@@ -31,7 +31,7 @@ services:
       DB_PASSWORD: changeme123
       DB_ROOT_PASSWORD: changeme123
       SECRET_KEY_BASE: changeme123
-      DISABLE_USER_REGISTRATION: 'true'
+      DISABLE_USER_REGISTRATION: 'false'
     networks:
       standardnotes:
         aliases:
@@ -41,6 +41,8 @@ services:
     build: ./web
     environment:
       RAILS_ENV: production
+      PORT: 3000
+      APP_HOST: 'http://localhost:3000'
       SECRET_KEY_BASE: changeMeTo128CharRandomString
       SF_DEFAULT_SERVER: 'http://localhost:3000/api'
       EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
