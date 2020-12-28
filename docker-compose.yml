@@ -57,7 +57,7 @@ services:
       - web
     build: ./nginx
     ports:
-      - '3000:3000'
+      - '9104:3000'
     networks:
       standardnotes:
         aliases:
