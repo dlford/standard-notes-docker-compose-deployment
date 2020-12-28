@@ -30,7 +30,7 @@ services:
       DB_PASSWORD: changeme123
       DB_ROOT_PASSWORD: changeme123
       SECRET_KEY_BASE: changeme123
-      DISABLE_USER_REGISTRATION: 'true'
+      DISABLE_USER_REGISTRATION: 'false'
     networks:
       standardnotes:
         aliases:
