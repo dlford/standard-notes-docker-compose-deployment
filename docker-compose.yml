@@ -30,7 +30,7 @@ services:
       DB_PASSWORD: changeme123
       DB_ROOT_PASSWORD: changeme123
       SECRET_KEY_BASE: changeme123
-      DISABLE_USER_REGISTRATION: 'false'
+      DISABLE_USER_REGISTRATION: 'true'
     networks:
       standardnotes:
         aliases:
@@ -43,7 +43,7 @@ services:
       PORT: 3000
       APP_HOST: 'https://notes.dlford.co'
       SECRET_KEY_BASE: changeMeTo128CharRandomString
-      SF_DEFAULT_SERVER: 'https://notes.dlford.co'
+      SF_DEFAULT_SERVER: 'https://notes.dlford.co/api'
       EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
       BATCH_MANAGER_LOCATION: extensions/batch-manager/dist/index.min.html
       RAILS_SERVE_STATIC_FILES: 'true'
