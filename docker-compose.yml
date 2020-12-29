@@ -52,6 +52,7 @@ services:
         aliases:
           - web
   nginx:
+    restart: always
     depends_on:
       - api
       - web
