@@ -9,7 +9,7 @@ build:
   stage: build
   script:
     - git submodule update --init --recursive
-    - cd ./web && get checkout master && git pull && cd ..
+    - cd ./web && git checkout master && git pull && cd ..
     - cd ./syncing-server && git checkout master && git pull && cd ..
     - COMPOSE_PROJECT_NAME=standardnotes docker-compose build
 deploy:
