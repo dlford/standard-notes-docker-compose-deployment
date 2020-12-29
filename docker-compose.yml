@@ -7,8 +7,8 @@ services:
     environment:
       MYSQL_DATABASE: standardnotes_db
       MYSQL_USER: standardnotes_user
-      MYSQL_PASSWORD: changeme123
-      MYSQL_ROOT_PASSWORD: changeme123
+      MYSQL_PASSWORD: 6c3b1f26c42905e0a94c47cc79015a12acdb0299e50e910df6926b7529f64e5ab8b54d5488b85fe3f6e7549157b0b9ce87730de88317cb35c9f712654052c7cb
+      MYSQL_ROOT_PASSWORD: 5ea72918950036ca52aaf11b1e0b16127962a45247a511e61d2b12353b7d28ece2a5044a110246045beb5011785544f4af6b7a4fda42c0984d8adcc19ac0f316
     volumes:
       - standardnotes_db:/var/lib/mysql
     networks:
@@ -27,9 +27,9 @@ services:
       RAILS_ENV: production
       DB_DATABASE: standardnotes_db
       DB_USERNAME: standardnotes_user
-      DB_PASSWORD: changeme123
-      DB_ROOT_PASSWORD: changeme123
-      SECRET_KEY_BASE: changeme123
+      DB_PASSWORD: 6c3b1f26c42905e0a94c47cc79015a12acdb0299e50e910df6926b7529f64e5ab8b54d5488b85fe3f6e7549157b0b9ce87730de88317cb35c9f712654052c7cb
+      DB_ROOT_PASSWORD: 5ea72918950036ca52aaf11b1e0b16127962a45247a511e61d2b12353b7d28ece2a5044a110246045beb5011785544f4af6b7a4fda42c0984d8adcc19ac0f316
+      SECRET_KEY_BASE: ece4c6511e2c85657fbef945f7004b233dd12604437a4773b32dc12229b719db2a4f8adc96682c2a577c13b2a02d595d77b570932bbef4ecb50797cf1a650a54
       DISABLE_USER_REGISTRATION: 'true'
     networks:
       standardnotes:
@@ -42,7 +42,7 @@ services:
       RAILS_ENV: production
       PORT: 3000
       APP_HOST: 'https://notes.dlford.co'
-      SECRET_KEY_BASE: changeMeTo128CharRandomString
+      SECRET_KEY_BASE: 0407d785096e1b08929316fa3b6046f53d187335d7789c6c6d0f76cc926bda179baf93119ba6c262825b057d8295e09d32c02d387d14c86b2c2cd4390ace9019
       SF_DEFAULT_SERVER: 'https://notes.dlford.co/api'
       EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
       BATCH_MANAGER_LOCATION: extensions/batch-manager/dist/index.min.html
