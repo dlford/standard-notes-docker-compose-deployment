@@ -1,5 +1,7 @@
 # Standard Notes Docker Compose Deployment
 
+__IMPORTANT : This repository is now defunct, there have been some big changes to the frontend that no longer support the legacy backend. On the bright side, there are now official Docker images for StandardNotes, look for the `standardnotes/standalone` Docker deployment and use that instead.__
+
 I didn't like that there were no official Docker images for the Standard Notes
 front-end or back-end, so I decided it was best to set up a repository to build
 the Docker images from source and deploy them with Docker Comopse.
