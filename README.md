@@ -17,7 +17,7 @@ keep the deployment up to date.
 2. Fetch the latest sources
 
 - `git submodule update --init --recursive`
-- `git --git-dir ./web/.git pull origin master`
+- `git --git-dir ./web/.git pull origin main`
 
 3. Prepare the default extensions (optional)
 
