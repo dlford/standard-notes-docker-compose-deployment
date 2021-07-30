@@ -22,6 +22,7 @@ deploy:
   stage: deploy
   script:
     - echo "" > .env
+    - echo $DOCKER_PASS | docker login --username $DOCKER_USER --password-stdin
     - docker-compose pull
     - COMPOSE_PROJECT_NAME=standardnotes docker-compose up -d
 
