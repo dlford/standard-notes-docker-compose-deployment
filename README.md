@@ -11,7 +11,7 @@ keep the deployment up to date.
 
 1. Set up the environment
 
-- Copy the `example.env` file to `.env`, or set up all variables from `example.env` in your CI/CD solution.
+- Edit the `.env` file, or set up all variables from `.env` in your CI/CD solution.
 - Change all the variables that are random strings, use `openssl rand -hex 32` to generate values
 
 2. Fetch the latest sources
