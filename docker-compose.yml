@@ -1,70 +1,267 @@
-version: '2'
+version: "3.8"
 
 services:
   db:
     restart: always
     image: mysql:5.7
+    env_file:
+      - .env
     environment:
-      MYSQL_DATABASE: standardnotes_db
-      MYSQL_USER: standardnotes_user
-      MYSQL_PASSWORD: 6c3b1f26c42905e0a94c47cc79015a12acdb0299e50e910df6926b7529f64e5ab8b54d5488b85fe3f6e7549157b0b9ce87730de88317cb35c9f712654052c7cb
-      MYSQL_ROOT_PASSWORD: 5ea72918950036ca52aaf11b1e0b16127962a45247a511e61d2b12353b7d28ece2a5044a110246045beb5011785544f4af6b7a4fda42c0984d8adcc19ac0f316
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      NODE_ENV: production
     volumes:
       - standardnotes_db:/var/lib/mysql
     networks:
       standardnotes:
         aliases:
           - db
-  api:
-    restart: always
-    build: ./syncing-server
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      EXPOSED_PORT: 3000
-      RAILS_ENV: production
-      DB_DATABASE: standardnotes_db
-      DB_USERNAME: standardnotes_user
-      DB_PASSWORD: 6c3b1f26c42905e0a94c47cc79015a12acdb0299e50e910df6926b7529f64e5ab8b54d5488b85fe3f6e7549157b0b9ce87730de88317cb35c9f712654052c7cb
-      DB_ROOT_PASSWORD: 5ea72918950036ca52aaf11b1e0b16127962a45247a511e61d2b12353b7d28ece2a5044a110246045beb5011785544f4af6b7a4fda42c0984d8adcc19ac0f316
-      SECRET_KEY_BASE: ece4c6511e2c85657fbef945f7004b233dd12604437a4773b32dc12229b719db2a4f8adc96682c2a577c13b2a02d595d77b570932bbef4ecb50797cf1a650a54
-      DISABLE_USER_REGISTRATION: 'true'
-    networks:
-      standardnotes:
-        aliases:
-          - api
+
   web:
     restart: always
     build: ./web
+    env_file:
+      - .env
     environment:
       RAILS_ENV: production
       PORT: 3000
-      APP_HOST: 'https://notes.dlford.co'
-      SECRET_KEY_BASE: 0407d785096e1b08929316fa3b6046f53d187335d7789c6c6d0f76cc926bda179baf93119ba6c262825b057d8295e09d32c02d387d14c86b2c2cd4390ace9019
-      SF_DEFAULT_SERVER: 'https://notes.dlford.co/api'
+      APP_HOST: ${APP_HOSTNAME}
+      SECRET_KEY_BASE: ${APP_SECRET}
+      SF_DEFAULT_SERVER: ${API_HOSTNAME}
       EXTENSIONS_MANAGER_LOCATION: extensions/extensions-manager/dist/index.html
       BATCH_MANAGER_LOCATION: extensions/batch-manager/dist/index.min.html
-      RAILS_SERVE_STATIC_FILES: 'true'
+      RAILS_SERVE_STATIC_FILES: "true"
     networks:
       standardnotes:
         aliases:
           - web
+
   nginx:
     restart: always
     depends_on:
-      - api
       - web
+      - api-gateway
     build: ./nginx
     ports:
-      - '9104:3000'
+      - ${PORT}:3000
     networks:
       standardnotes:
         aliases:
           - nginx
 
+  cache:
+    image: redis:6.0-alpine
+    volumes:
+      - standardnotes_cache:/data
+    networks:
+      standardnotes:
+        aliases:
+          - cache
+
+  syncing-server-js:
+    image: standardnotes/syncing-server-js:1.35.2
+    depends_on:
+      - db
+      - cache
+    entrypoint: [
+      "./wait-for.sh", "db", "3306",
+      "./wait-for.sh", "cache", "6379",
+      "./docker/entrypoint.sh", "start-web"
+    ]
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      EXPOSED_PORT: 3000
+      LOG_LEVEL: info
+      NODE_ENV: production
+      AUTH_JWT_SECRET: ${AUTH_SECRET}
+      DB_HOST: db
+      DB_REPLICA_HOST: db
+      DB_PORT: 3306
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+      DB_DATABASE: ${DB_NAME}
+      DB_DEBUG_LEVEL: info # "all" | "query" | "schema" | "error" | "warn" | "info" | "log" | "migration"
+      DB_MIGRATIONS_PATH: dist/migrations/*.js
+      REDIS_URL: redis://cache
+      REDIS_EVENTS_CHANNEL: events
+      AUTH_SERVER_URL: http://auth:3000
+      EMAIL_ATTACHMENT_MAX_BYTE_SIZE: 10485760
+      REVISIONS_FREQUENCY: 300
+      NEW_RELIC_ENABLED: "false"
+      NEW_RELIC_APP_NAME: "Syncing Server JS"
+    restart: always
+    networks:
+      standardnotes:
+        aliases:
+          - syncing-server-js
+
+  syncing-server-js-worker:
+    image: standardnotes/syncing-server-js:1.35.2
+    depends_on:
+      - db
+      - cache
+      - syncing-server-js
+    entrypoint: [
+      "./wait-for.sh", "db", "3306",
+      "./wait-for.sh", "cache", "6379",
+      "./wait-for.sh", "syncing-server-js", "3000",
+       "./docker/entrypoint.sh", "start-worker"
+    ]
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      LOG_LEVEL: info
+      NODE_ENV: production
+      AUTH_JWT_SECRET: ${AUTH_SECRET}
+      EXPOSED_PORT: 3000
+      DB_HOST: db
+      DB_REPLICA_HOST: db
+      DB_PORT: 3306
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+      DB_DATABASE: ${DB_NAME}
+      DB_DEBUG_LEVEL: info # "all" | "query" | "schema" | "error" | "warn" | "info" | "log" | "migration"
+      DB_MIGRATIONS_PATH: dist/migrations/*.js
+      REDIS_URL: redis://cache
+      REDIS_EVENTS_CHANNEL: events
+      AUTH_SERVER_URL: http://auth:3000
+      EMAIL_ATTACHMENT_MAX_BYTE_SIZE: 10485760
+      REVISIONS_FREQUENCY: 300
+      NEW_RELIC_ENABLED: "false"
+      NEW_RELIC_APP_NAME: "Syncing Server JS Worker"
+    restart: always
+    networks:
+      standardnotes:
+        aliases:
+          - syncing-server-js-worker
+
+  api-gateway:
+    image: standardnotes/api-gateway:1.20.0
+    depends_on:
+      - auth
+      - syncing-server-js
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      AUTH_JWT_SECRET: ${AUTH_SECRET}
+      LOG_LEVEL: info
+      NODE_ENV: production
+      NEW_RELIC_ENABLED: "false"
+      NEW_RELIC_APP_NAME: "API Gateway"
+      SYNCING_SERVER_JS_URL: http://syncing-server-js:3000
+      AUTH_SERVER_URL: http://auth:3000
+    entrypoint: [
+      "./wait-for.sh", "auth", "3000",
+      "./wait-for.sh", "syncing-server-js", "3000",
+      "./docker/entrypoint.sh", "start-web"
+    ]
+    networks:
+      standardnotes:
+        aliases:
+          - api-gateway
+
+  auth:
+    image: standardnotes/auth:1.11.0
+    depends_on:
+      - db
+      - cache
+      - syncing-server-js
+    entrypoint: [
+      "./wait-for.sh", "db", "3306",
+      "./wait-for.sh", "cache", "6379",
+      "./wait-for.sh", "syncing-server-js", "3000",
+      "./docker/entrypoint.sh", "start-web"
+    ]
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_REPLICA_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_NAME}
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+      DB_DEBUG_LEVEL: info
+      DB_MIGRATIONS_PATH: dist/migrations/*.js
+      REDIS_URL: redis://cache
+      AUTH_JWT_SECRET: ${AUTH_SECRET}
+      LOG_LEVEL: info
+      NODE_ENV: production
+      AUTH_JWT_TTL: 60000
+      JWT_SECRET: ${JWT_SECRET}
+      LEGACY_JWT_SECRET: ${LEGACY_JWT_SECRET}
+      NEW_RELIC_ENABLED: "false"
+      NEW_RELIC_APP_NAME: "Auth"
+      REDIS_EVENTS_CHANNEL: auth-events
+      DISABLE_USER_REGISTRATION: ${DISABLE_REGISTRATION}
+      PSEUDO_KEY_PARAMS_KEY: ${PSEUDO_KEY_PARAMS_KEY}
+      ACCESS_TOKEN_AGE: 5184000
+      REFRESH_TOKEN_AGE: 31556926
+      MAX_LOGIN_ATTEMPTS: 6
+      FAILED_LOGIN_LOCKOUT: 3600
+      EPHEMERAL_SESSION_AGE: 259200
+      ENCRYPTION_SERVER_KEY: ${ENCRYPTION_SERVER_KEY}
+      SYNCING_SERVER_URL: http://syncing-server-js:3000
+    networks:
+      standardnotes:
+        aliases:
+          - auth
+
+  auth-worker:
+    image: standardnotes/auth:1.11.0
+    depends_on:
+      - db
+      - cache
+      - auth
+    entrypoint: [
+      "./wait-for.sh", "db", "3306",
+      "./wait-for.sh", "cache", "6379",
+      "./wait-for.sh", "auth", "3000",
+      "./docker/entrypoint.sh", "start-worker"
+    ]
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_NAME}
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASS}
+      REDIS_URL: redis://cache
+      AUTH_JWT_SECRET: ${AUTH_SECRET}
+      LOG_LEVEL: info
+      NODE_ENV: production
+      AUTH_JWT_TTL: 60000
+      JWT_SECRET: ${JWT_SECRET}
+      LEGACY_JWT_SECRET: ${LEGACY_JWT_SECRET}
+      NEW_RELIC_ENABLED: "false"
+      NEW_RELIC_APP_NAME: "Auth Worker"
+      REDIS_EVENTS_CHANNEL: auth-events
+      DISABLE_USER_REGISTRATION: ${DISABLE_REGISTRATION}
+      PSEUDO_KEY_PARAMS_KEY: ${PSEUDO_KEY_PARAMS_KEY}
+      ACCESS_TOKEN_AGE: 5184000
+      REFRESH_TOKEN_AGE: 31556926
+      MAX_LOGIN_ATTEMPTS: 6
+      FAILED_LOGIN_LOCKOUT: 3600
+      EPHEMERAL_SESSION_AGE: 259200
+      ENCRYPTION_SERVER_KEY: ${ENCRYPTION_SERVER_KEY}
+      SYNCING_SERVER_URL: http://syncing-server-js:3000
+    networks:
+      standardnotes:
+        aliases:
+          - auth-worker
+
 volumes:
   standardnotes_db:
+  standardnotes_cache:
 networks:
   standardnotes:
+

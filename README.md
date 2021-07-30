@@ -9,17 +9,22 @@ keep the deployment up to date.
 
 ## How to use this repository
 
-1. Edit the `docker-compose.yml` file
-  - Update all the values that include `changeme`
-  - The `SECRET_KEY_BASE` for both `api` and `web` should each be a unique random string, you could use the command `openssl rand -hex 64` for example to generate these keys
-  - Change the port on the NGINX container if needed
+1. Set up the environment
+
+- Copy the `example.env` file to `.env`, or set up all variables from `example.env` in your CI/CD solution.
+- Change all the variables that are random strings, use `openssl rand -hex 32` to generate values
+
 2. Fetch the latest sources
-  - `git submodule update --init --recursive`
-  - `git --git-dir ./web/.git pull origin master`
-  - `git --git-dir ./syncing-server/.git pull origin master`
+
+- `git submodule update --init --recursive`
+- `git --git-dir ./web/.git pull origin master`
+
 3. Prepare the default extensions (optional)
-  - `npm install --prefix ./web/public/extensions/batch-manager`
-  - `npm install --prefix ./web/public/extensions/extensions-manager`
+
+- `npm install --prefix ./web/public/extensions/batch-manager`
+- `npm install --prefix ./web/public/extensions/extensions-manager`
+
 4. Deploy
-  - `docker-compose build`
-  - `docker-compose up -d`
+
+- `docker-compose build`
+- `docker-compose up -d`

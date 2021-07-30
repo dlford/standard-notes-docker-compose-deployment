@@ -10,7 +10,6 @@ build:
   script:
     - git submodule update --init --recursive
     - git --git-dir ./web/.git pull origin main
-    - git --git-dir ./syncing-server/.git pull origin master
     - npm install --prefix ./web/public/extensions/batch-manager
     - npm install --prefix ./web/public/extensions/extensions-manager
     - COMPOSE_PROJECT_NAME=standardnotes docker-compose build
