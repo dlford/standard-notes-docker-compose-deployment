@@ -1,8 +1,6 @@
 # Standard Notes Docker Compose Deployment
 
-I didn't like that there were no official Docker images for the Standard Notes
-front-end or back-end, so I decided it was best to set up a repository to build
-the Docker images from source and deploy them with Docker Comopse.
+Full stack Standard Notes deployment including the web app, and an NGINX reverse proxy to put the syncing server at the `/api` route so you only need one hostname.
 
 There is also a GitLab CI configuration, which I set up to run on a schedule to
 keep the deployment up to date.
