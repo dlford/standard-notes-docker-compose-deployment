@@ -8,6 +8,7 @@ build:
     - master
   stage: build
   script:
+    - echo "" > .env
     - git submodule update --init --recursive
     - git --git-dir ./web/.git pull origin main
     - npm install --prefix ./web/public/extensions/batch-manager
