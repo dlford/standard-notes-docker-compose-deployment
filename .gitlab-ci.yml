@@ -21,5 +21,6 @@ deploy:
     - master
   stage: deploy
   script:
+    - echo "" > .env
     - COMPOSE_PROJECT_NAME=standardnotes docker-compose up -d
 
